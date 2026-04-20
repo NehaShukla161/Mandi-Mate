@@ -1,0 +1,67 @@
+name: mandi_mate
+description: On-device agricultural decision agent for Marathi-speaking farmers, powered by Gemma 4.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Gemma 4 on-device inference via MediaPipe
+  # Check pub.dev for the latest version at build time — the package has
+  # been actively evolving since the 3n release.
+  flutter_gemma: ^0.9.0
+
+  # Audio I/O
+  speech_to_text: ^6.6.2      # Offline Marathi STT via Android's native recognizer
+  flutter_tts: ^4.0.2         # Offline Marathi TTS via Android native engine
+
+  # Camera
+  camera: ^0.11.0
+  image: ^4.1.7               # Image preprocessing for Gemma 4 vision
+
+  # Storage & assets
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
+
+  # State & utilities
+  provider: ^6.1.1
+  intl: ^0.19.0
+
+  # Charts
+  fl_chart: ^0.66.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/forecasts.json
+    - assets/mandi_metadata.json
+    - assets/fonts/
+
+  fonts:
+    - family: Hind
+      fonts:
+        - asset: assets/fonts/Hind-Regular.ttf
+        - asset: assets/fonts/Hind-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Hind-SemiBold.ttf
+          weight: 600
+    - family: TiroDevanagariMarathi
+      fonts:
+        - asset: assets/fonts/TiroDevanagariMarathi-Regular.ttf
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-Regular.ttf
+        - asset: assets/fonts/Fraunces-Medium.ttf
+          weight: 500

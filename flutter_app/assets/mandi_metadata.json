@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-04-16T00:00:00Z",
+  "reference_farm": {
+    "name": "Niphad, Nashik District",
+    "latitude": 20.0787,
+    "longitude": 74.1094,
+    "description": "Notional farm location used for distance calculations. A production build reads the phone's GPS once and persists it."
+  },
+  "mandis": {
+    "Nashik": {
+      "name_mr": "नाशिक",
+      "latitude": 19.9975,
+      "longitude": 73.7898,
+      "distance_km": 22,
+      "apmc_commission_rate": 0.06,
+      "open_days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+      "notes": "Largest tomato mandi in India; sets national reference price."
+    },
+    "Pune": {
+      "name_mr": "पुणे",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "distance_km": 198,
+      "apmc_commission_rate": 0.06,
+      "open_days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+      "notes": "Gultekdi APMC; higher retail demand, premium over Nashik typical."
+    },
+    "Aurangabad": {
+      "name_mr": "औरंगाबाद",
+      "latitude": 19.8762,
+      "longitude": 75.3433,
+      "distance_km": 145,
+      "apmc_commission_rate": 0.06,
+      "open_days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+      "notes": "Regional hub for Marathwada; prices often track Nashik with 1-2 day lag."
+    },
+    "Nagpur": {
+      "name_mr": "नागपूर",
+      "latitude": 21.1458,
+      "longitude": 79.0882,
+      "distance_km": 520,
+      "apmc_commission_rate": 0.06,
+      "open_days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+      "notes": "Distance typically prohibitive for Nashik-district farmers; included for completeness."
+    },
+    "Kolhapur": {
+      "name_mr": "कोल्हापूर",
+      "latitude": 16.7050,
+      "longitude": 74.2433,
+      "distance_km": 385,
+      "apmc_commission_rate": 0.06,
+      "open_days": ["Mon","Tue","Wed","Thu","Fri","Sat"],
+      "notes": "Southern Maharashtra; different seasonal pattern from Nashik."
+    }
+  },
+  "transport": {
+    "cost_per_km_per_quintal_inr": 2.8,
+    "notes": "Baseline rate from Maharashtra State Transport freight schedule. Users can override in Settings."
+  }
+}

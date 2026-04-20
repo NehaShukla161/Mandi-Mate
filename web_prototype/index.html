@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mandi Mate — Interactive Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Tiro+Devanagari+Marathi&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4EBD6;
+    --bg-warm: #FAF4E8;
+    --ink: #2B1810;
+    --ink-soft: #5A4530;
+    --line: #D9C79F;
+    --line-soft: #EADFBE;
+    --turmeric: #D49B26;
+    --turmeric-dark: #A87813;
+    --terracotta: #B54C20;
+    --terracotta-dark: #8B3812;
+    --sage: #6B7F4C;
+    --sage-soft: rgba(107, 127, 76, 0.18);
+    --crimson: #8B2218;
+    --card: #FFFFFF;
+    --shadow: 0 2px 4px rgba(43, 24, 16, 0.06), 0 8px 24px rgba(43, 24, 16, 0.08);
+    --shadow-deep: 0 4px 12px rgba(43, 24, 16, 0.12), 0 24px 48px rgba(43, 24, 16, 0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Hind', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grain texture for warmth */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(212, 155, 38, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(181, 76, 32, 0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr min(420px, 95vw) 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 16px;
+    padding: 20px 16px 24px;
+  }
+
+  /* Header */
+  header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 8px 12px;
+    border-bottom: 1px dashed var(--line);
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .brand .dot {
+    color: var(--turmeric-dark);
+  }
+  .tagline {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Phone frame */
+  .stage {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 9 / 19;
+    background: var(--bg-warm);
+    border: 10px solid #1a1210;
+    border-radius: 42px;
+    box-shadow: var(--shadow-deep);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    background: #1a1210;
+    border-radius: 14px;
+    z-index: 10;
+  }
+
+  /* Status bar inside phone */
+  .statusbar {
+    height: 42px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 22px 0 28px;
+    padding-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .statusbar .right {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 11px;
+  }
+  .offline-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--terracotta);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+  .offline-pill::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: white;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Screen content */
+  .screen {
+    flex: 1;
+    padding: 16px 20px 24px;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active {
+    display: flex;
+    animation: fadeIn 0.32s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Typography helpers */
+  .devanagari {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-feature-settings: 'liga' 1;
+  }
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .big-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Screen 1: Home */
+  .greeting {
+    margin-top: 24px;
+  }
+  .greeting .hi-devnagari {
+    font-size: 28px;
+    color: var(--terracotta-dark);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .greeting .hi-en {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .action-card {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .action-card:hover, .action-card:active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-deep);
+  }
+  .action-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 26px;
+  }
+  .action-icon.turmeric { background: #FCF2D9; color: var(--turmeric-dark); }
+  .action-icon.terracotta { background: #F7DCCF; color: var(--terracotta-dark); }
+  .action-icon.sage { background: #DEE5CB; color: var(--sage); }
+  .action-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .action-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.35;
+  }
+
+  .mandi-strip {
+    margin-top: auto;
+    padding-top: 18px;
+  }
+  .mandi-strip-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .mandi-strip-title .label { color: var(--ink-soft); }
+  .mandi-strip-title .updated { font-size: 10px; color: var(--ink-soft); }
+  .mandi-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 13px;
+  }
+  .mandi-row:last-child { border-bottom: none; }
+  .mandi-row .name { font-weight: 500; }
+  .mandi-row .price {
+    font-family: 'Fraunces', serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .mandi-row .delta {
+    font-size: 11px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .delta.up { color: var(--sage); }
+  .delta.down { color: var(--crimson); }
+
+  /* Screen 2: Camera */
+  .camera-frame {
+    flex: 1;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #3a2e20 0%, #1a1210 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .camera-tomato-svg {
+    width: 85%;
+    max-height: 85%;
+  }
+  .viewfinder {
+    position: absolute;
+    inset: 16px;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .viewfinder::before, .viewfinder::after,
+  .viewfinder .c1, .viewfinder .c2 {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--turmeric);
+  }
+  .viewfinder::before { top: -3px; left: -3px; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
+  .viewfinder::after { top: -3px; right: -3px; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
+  .viewfinder .c1 { bottom: -3px; left: -3px; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
+  .viewfinder .c2 { bottom: -3px; right: -3px; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
+
+  .shutter-area {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 36px;
+  }
+  .shutter {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s;
+  }
+  .shutter:hover { transform: scale(1.05); }
+  .shutter:active { transform: scale(0.95); }
+  .camera-hint {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .camera-hint .devanagari { color: var(--ink); font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* Screen 3: Analysis */
+  .analysis-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 16px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .analysis-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .grade-card {
+    background: linear-gradient(135deg, #FCF2D9 0%, #F7E3B5 100%);
+    border: 1px solid #E8CA7A;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .grade-letter {
+    font-family: 'Fraunces', serif;
+    font-size: 72px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--turmeric-dark);
+  }
+  .grade-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .grade-confidence {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  .kv-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
+  }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label { color: var(--ink-soft); }
+  .kv-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Screen 4: Voice */
+  .voice-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+  .mic-button {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #D95F28 0%, var(--terracotta) 60%, var(--terracotta-dark) 100%);
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: white;
+    box-shadow: 0 12px 32px rgba(139, 56, 18, 0.35), inset 0 -4px 12px rgba(0,0,0,0.2);
+    position: relative;
+    transition: transform 0.15s;
+  }
+  .mic-button:active { transform: scale(0.96); }
+  .mic-button svg { width: 56px; height: 56px; }
+
+  .mic-button.listening::after {
+    content: '';
+    position: absolute;
+    inset: -16px;
+    border: 3px solid var(--terracotta);
+    border-radius: 50%;
+    animation: ring-out 1.4s ease-out infinite;
+  }
+  .mic-button.listening::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 3px solid var(--terracotta);
+    border-radius: 50%;
+    animation: ring-out 1.4s ease-out infinite 0.4s;
+    opacity: 0.6;
+  }
+  @keyframes ring-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(1.4); opacity: 0; }
+  }
+
+  .voice-prompt {
+    text-align: center;
+  }
+  .voice-prompt .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .voice-prompt .marathi {
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .voice-prompt .english {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .transcript-box {
+    width: 100%;
+    padding: 16px;
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    margin-top: 8px;
+    min-height: 70px;
+    text-align: center;
+  }
+  .transcript-box.empty { opacity: 0.4; }
+
+  /* Screen 5: Agent thinking */
+  .agent-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .agent-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sage);
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .agent-header-text {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .tool-call {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: slideIn 0.3s forwards;
+  }
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tool-call:nth-child(2) { animation-delay: 0.4s; }
+  .tool-call:nth-child(3) { animation-delay: 1.2s; }
+  .tool-call:nth-child(4) { animation-delay: 2.0s; }
+  .tool-call:nth-child(5) { animation-delay: 2.8s; }
+
+  .tool-name {
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-weight: 600;
+    color: var(--terracotta-dark);
+    font-size: 11px;
+  }
+  .tool-args {
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .tool-result {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--line-soft);
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .tool-result .checkmark {
+    color: var(--sage);
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  /* Screen 6: Answer */
+  .recommendation {
+    background: linear-gradient(135deg, var(--turmeric) 0%, var(--terracotta) 100%);
+    color: white;
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .recommendation::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -15%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .rec-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+  .rec-action {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-size: 28px;
+    margin-top: 6px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+    position: relative;
+  }
+  .rec-english {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 14px;
+  }
+  .rec-speak {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+  }
+  .rec-speak:hover { background: rgba(255,255,255,0.3); }
+
+  .breakdown-title {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin: 14px 0 8px;
+  }
+
+  .mandi-comparison {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .mandi-bar {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .mandi-bar .head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .mandi-bar .head .name { font-weight: 600; }
+  .mandi-bar .head .net {
+    font-family: 'Fraunces', serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .mandi-bar .detail {
+    font-size: 11px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mandi-bar.best {
+    background: linear-gradient(135deg, #F0F4E4 0%, #DEE5CB 100%);
+    border-color: var(--sage);
+  }
+  .mandi-bar.best .name::after {
+    content: ' ★';
+    color: var(--sage);
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    padding: 16px 14px;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .chart-sub {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 14px;
+    font-size: 10px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .chart-legend .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* Navigation */
+  .nav {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .nav-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { background: var(--ink); color: white; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn.primary {
+    background: var(--terracotta);
+    color: white;
+    border-color: var(--terracotta-dark);
+  }
+  .nav-btn.primary:hover { background: var(--terracotta-dark); }
+  .nav-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .nav-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background 0.2s;
+  }
+  .nav-dots span.active {
+    background: var(--terracotta);
+    width: 24px;
+    border-radius: 4px;
+  }
+  .step-label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 80px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div>
+      <div class="brand">Mandi<span class="dot">·</span>Mate <span style="font-size:12px;color:var(--ink-soft);font-weight:400;font-family:Hind;">प्रोटोटाइप</span></div>
+      <div class="tagline">Gemma 4 · On-device · Marathi-first</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:12px;color:var(--ink-soft);">Demo scene</div>
+      <div id="scene-label" style="font-family:'Fraunces',serif;font-size:18px;">1 of 6</div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="statusbar">
+        <span>5:42 AM</span>
+        <div class="right">
+          <span class="offline-pill">OFFLINE</span>
+          <span>🔋 88%</span>
+        </div>
+      </div>
+
+      <!-- SCREEN 1 : HOME -->
+      <div class="screen active" data-screen="1">
+        <div class="greeting">
+          <div class="devanagari hi-devnagari">नमस्कार रमेश</div>
+          <div class="hi-en">Good morning, Ramesh · Thursday, 16 April</div>
+        </div>
+
+        <div class="card action-card" onclick="goTo(2)">
+          <div class="action-icon turmeric">📷</div>
+          <div>
+            <div class="action-title">Check my tomatoes</div>
+            <div class="action-sub"><span class="devanagari">माझे टोमॅटो तपासा</span> — grade quality, estimate weight</div>
+          </div>
+        </div>
+
+        <div class="card action-card" onclick="goTo(4)">
+          <div class="action-icon terracotta">🎙️</div>
+          <div>
+            <div class="action-title">Ask a question</div>
+            <div class="action-sub"><span class="devanagari">काहीतरी विचारा</span> — speak in Marathi</div>
+          </div>
+        </div>
+
+        <div class="mandi-strip card" style="margin-top: 14px; padding: 14px 16px;">
+          <div class="mandi-strip-title">
+            <span class="label">Nearby Mandi Prices</span>
+            <span class="updated">synced 4 hr ago</span>
+          </div>
+          <div class="mandi-row">
+            <span class="name">Nashik</span>
+            <span><span class="price">₹35.29</span><span class="delta up">+1.8%</span></span>
+          </div>
+          <div class="mandi-row">
+            <span class="name">Pune</span>
+            <span><span class="price">₹40.87</span><span class="delta up">+0.6%</span></span>
+          </div>
+          <div class="mandi-row">
+            <span class="name">Aurangabad</span>
+            <span><span class="price">₹28.30</span><span class="delta down">−2.4%</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2 : CAMERA -->
+      <div class="screen" data-screen="2">
+        <div class="camera-frame">
+          <div class="viewfinder"><div class="c1"></div><div class="c2"></div></div>
+          <svg class="camera-tomato-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="tomRed" cx="35%" cy="30%">
+                <stop offset="0%" stop-color="#F06A3C"/>
+                <stop offset="55%" stop-color="#C33A1C"/>
+                <stop offset="100%" stop-color="#7E2110"/>
+              </radialGradient>
+              <radialGradient id="tomRed2" cx="40%" cy="35%">
+                <stop offset="0%" stop-color="#E35A2E"/>
+                <stop offset="60%" stop-color="#B03218"/>
+                <stop offset="100%" stop-color="#6B1A0A"/>
+              </radialGradient>
+              <linearGradient id="woodCrate" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#8B6232"/>
+                <stop offset="100%" stop-color="#5A3E1E"/>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="180" width="260" height="100" rx="6" fill="url(#woodCrate)"/>
+            <rect x="20" y="178" width="260" height="8" fill="#3A2813"/>
+            <!-- tomatoes scattered in crate -->
+            <circle cx="80" cy="170" r="38" fill="url(#tomRed)"/>
+            <circle cx="150" cy="155" r="42" fill="url(#tomRed2)"/>
+            <circle cx="220" cy="170" r="40" fill="url(#tomRed)"/>
+            <circle cx="110" cy="195" r="36" fill="url(#tomRed2)"/>
+            <circle cx="190" cy="200" r="38" fill="url(#tomRed)"/>
+            <!-- stems -->
+            <path d="M 78 138 Q 75 128 82 126 Q 88 132 85 140" fill="#4A6B2E"/>
+            <path d="M 148 118 Q 145 108 155 106 Q 162 113 158 122" fill="#4A6B2E"/>
+            <path d="M 218 138 Q 215 128 225 126 Q 232 133 228 142" fill="#4A6B2E"/>
+            <!-- highlights -->
+            <ellipse cx="66" cy="152" rx="8" ry="12" fill="rgba(255,220,180,0.5)"/>
+            <ellipse cx="135" cy="138" rx="10" ry="14" fill="rgba(255,220,180,0.5)"/>
+            <ellipse cx="205" cy="152" rx="8" ry="12" fill="rgba(255,220,180,0.5)"/>
+          </svg>
+        </div>
+        <div class="camera-hint">
+          <span class="devanagari">टोमॅटोवर कॅमेरा धरा</span>
+          Hold camera over tomatoes
+        </div>
+        <div class="shutter-area">
+          <button class="shutter" onclick="goTo(3)" aria-label="Capture"></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 3 : QUALITY ANALYSIS -->
+      <div class="screen" data-screen="3">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Gemma 4 · Vision analysis</div>
+        <div class="analysis-title">Your tomatoes</div>
+        <div class="analysis-sub">Inference ran on your phone in 1.3 seconds. No data left your device.</div>
+
+        <div class="grade-card">
+          <div class="grade-letter">A</div>
+          <div class="grade-label">Top Grade</div>
+          <div class="grade-confidence">confidence · 87%</div>
+        </div>
+
+        <div class="card" style="padding: 4px 16px;">
+          <div class="kv-row">
+            <span class="kv-label">Estimated weight</span>
+            <span class="kv-value">18.5 kg</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-label">Ripeness</span>
+            <span class="kv-value">Firm · ready 2–4 days</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-label">Visible defects</span>
+            <span class="kv-value" style="color:var(--sage);">None</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-label">Size distribution</span>
+            <span class="kv-value">Medium–large, uniform</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto; padding-top: 14px;">
+          <button class="nav-btn primary" style="width:100%;padding:12px;" onclick="goTo(4)">
+            Ask Mandi Mate what to do →
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 4 : VOICE -->
+      <div class="screen" data-screen="4">
+        <div class="voice-stage">
+          <div class="voice-prompt">
+            <div class="hint">Hold to speak</div>
+            <div class="devanagari marathi" id="voice-question">"आज विकू का?"</div>
+            <div class="english">"Should I sell today?"</div>
+          </div>
+
+          <button class="mic-button" id="mic-btn" onclick="startVoice()" aria-label="Mic">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
+              <path d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V22h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </button>
+
+          <div class="transcript-box empty" id="transcript">
+            <span class="devanagari" style="font-size:16px;">तुमचा प्रश्न इथे दिसेल</span>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Your question will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 5 : AGENT THINKING -->
+      <div class="screen" data-screen="5">
+        <div class="agent-header">
+          <div class="agent-dot"></div>
+          <div class="agent-header-text">Gemma 4 is reasoning · 4 tool calls</div>
+        </div>
+
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;">
+          <span class="label" style="font-size:10px;">User</span>
+          <div class="devanagari" style="font-size:15px;margin-top:2px;">"आज विकू का?"</div>
+        </div>
+
+        <div class="tool-call">
+          <div class="tool-name">get_mandi_prices()</div>
+          <div class="tool-args">mandis=["Nashik","Pune","Aurangabad"], days_back=1</div>
+          <div class="tool-result"><span class="checkmark">✓</span> Nashik ₹35.29 · Pune ₹40.87 · Aurangabad ₹28.30</div>
+        </div>
+
+        <div class="tool-call">
+          <div class="tool-name">calculate_net_profit()</div>
+          <div class="tool-args">quantity_kg=18.5, grade="A"</div>
+          <div class="tool-result"><span class="checkmark">✓</span> Nashik net ₹578 · Pune net ₹590 · Aurangabad net ₹432</div>
+        </div>
+
+        <div class="tool-call">
+          <div class="tool-name">forecast_price()</div>
+          <div class="tool-args">mandi="Nashik", horizon_days=7</div>
+          <div class="tool-result"><span class="checkmark">✓</span> 7-day forecast ₹35→₹37 · 95% CI [₹31, ₹42]</div>
+        </div>
+
+        <div class="tool-call">
+          <div class="tool-name">forecast_price()</div>
+          <div class="tool-args">mandi="Pune", horizon_days=7</div>
+          <div class="tool-result"><span class="checkmark">✓</span> 7-day forecast ₹41→₹42 · 95% CI [₹36, ₹47]</div>
+        </div>
+
+        <div style="margin-top:auto;padding-top:14px;">
+          <button class="nav-btn primary" style="width:100%;padding:12px;" onclick="goTo(6)">
+            See recommendation →
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 6 : RECOMMENDATION -->
+      <div class="screen" data-screen="6">
+        <div class="recommendation">
+          <div class="rec-label">Recommendation</div>
+          <div class="devanagari rec-action">थांबा २ दिवस —<br/>पुण्याला न्या</div>
+          <div class="rec-english">Hold 2 days, then take to Pune</div>
+          <button class="rec-speak" onclick="speakMarathi()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+            </svg>
+            Play in Marathi
+          </button>
+        </div>
+
+        <div class="breakdown-title">Why this decision</div>
+
+        <div class="mandi-comparison">
+          <div class="mandi-bar best">
+            <div class="head">
+              <span class="name">Pune (hold 2 days)</span>
+              <span class="net">₹644 net</span>
+            </div>
+            <div class="detail">
+              <span>Est. price ₹42.30/kg</span>
+              <span>Transport ₹139</span>
+              <span>Commission ₹39</span>
+            </div>
+          </div>
+          <div class="mandi-bar">
+            <div class="head">
+              <span class="name">Nashik today</span>
+              <span class="net">₹578 net</span>
+            </div>
+            <div class="detail">
+              <span>₹35.29/kg</span><span>Transport ₹28</span><span>Commission ₹47</span>
+            </div>
+          </div>
+          <div class="mandi-bar">
+            <div class="head">
+              <span class="name">Pune today</span>
+              <span class="net">₹590 net</span>
+            </div>
+            <div class="detail">
+              <span>₹40.87/kg</span><span>Transport ₹139</span><span>Commission ₹38</span>
+            </div>
+          </div>
+          <div class="mandi-bar">
+            <div class="head">
+              <span class="name">Aurangabad today</span>
+              <span class="net">₹432 net</span>
+            </div>
+            <div class="detail">
+              <span>₹28.30/kg</span><span>Transport ₹102</span><span>Commission ₹20</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Pune price forecast · 14 days</div>
+          <div class="chart-sub">SARIMA + Holt-Winters ensemble with 95% confidence band</div>
+          <div id="chart-container"></div>
+          <div class="chart-legend">
+            <span><span class="swatch" style="background:var(--ink);"></span>History</span>
+            <span><span class="swatch" style="background:var(--turmeric);border-top:2px dashed var(--turmeric);"></span>Forecast</span>
+            <span><span class="swatch" style="background:var(--sage-soft);height:10px;"></span>95% CI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" onclick="prev()" id="btn-prev">← Back</button>
+    <div class="nav-dots" id="dots">
+      <span class="active"></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+    <span class="step-label" id="step-label">Home</span>
+    <button class="nav-btn primary" onclick="next()" id="btn-next">Next →</button>
+  </div>
+</div>
+
+<script>
+  const SCENE_LABELS = [
+    "Home", "Camera", "Quality", "Voice input", "Agent reasoning", "Recommendation"
+  ];
+  let current = 1;
+  const TOTAL = 6;
+
+  function render() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelector(`[data-screen="${current}"]`).classList.add('active');
+    document.querySelectorAll('#dots span').forEach((d, i) => {
+      d.classList.toggle('active', i === current - 1);
+    });
+    document.getElementById('step-label').textContent = SCENE_LABELS[current - 1];
+    document.getElementById('scene-label').textContent = `${current} of ${TOTAL}`;
+    document.getElementById('btn-prev').disabled = current === 1;
+    document.getElementById('btn-next').disabled = current === TOTAL;
+
+    if (current === 6) drawChart();
+    if (current === 4) resetVoice();
+  }
+
+  function goTo(n) { current = n; render(); }
+  function next() { if (current < TOTAL) { current++; render(); } }
+  function prev() { if (current > 1) { current--; render(); } }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // Voice scene: fake the recognition with a believable delay
+  function resetVoice() {
+    const t = document.getElementById('transcript');
+    t.classList.add('empty');
+    t.innerHTML = `<span class="devanagari" style="font-size:16px;">तुमचा प्रश्न इथे दिसेल</span>
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Your question will appear here</div>`;
+    document.getElementById('mic-btn').classList.remove('listening');
+  }
+
+  function startVoice() {
+    const mic = document.getElementById('mic-btn');
+    const t = document.getElementById('transcript');
+    if (mic.classList.contains('listening')) return;
+
+    mic.classList.add('listening');
+    t.classList.remove('empty');
+    t.innerHTML = `<span class="devanagari" style="font-size:15px;color:var(--ink-soft);">ऐकत आहे...</span>
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Listening</div>`;
+
+    setTimeout(() => {
+      t.innerHTML = `<span class="devanagari" style="font-size:20px;color:var(--ink);">"आज विकू का?"</span>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;font-style:italic;">"Should I sell today?"</div>`;
+      mic.classList.remove('listening');
+      setTimeout(() => goTo(5), 800);
+    }, 1800);
+  }
+
+  // Marathi playback via Web Speech API
+  function speakMarathi() {
+    if (!('speechSynthesis' in window)) {
+      alert('Marathi voice playback not supported in this browser. On the real device this uses Android native TTS.');
+      return;
+    }
+    const u = new SpeechSynthesisUtterance("थांबा दोन दिवस. पुण्याला टोमॅटो घेऊन जा. तुम्हाला जवळपास साडे सहाशे रुपये मिळतील.");
+    u.lang = 'mr-IN';
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  }
+
+  // Forecast chart
+  async function drawChart() {
+    const container = document.getElementById('chart-container');
+    if (container.querySelector('svg')) return;
+
+    let data;
+    try {
+      const res = await fetch('./forecasts.json');
+      data = await res.json();
+    } catch (e) {
+      // Fallback inline data if fetch fails (file:// protocol)
+      data = FALLBACK_DATA;
+    }
+
+    const pune = data.Pune;
+    const hist = pune.history.slice(-14);
+    const fcst = pune.forecast.slice(0, 14);
+
+    const allPoints = [
+      ...hist.map(d => ({ date: d.date, price: d.price, type: 'hist' })),
+      ...fcst.map(d => ({ date: d.date, price: d.price, low: d.low_95, high: d.high_95, type: 'fcst' })),
+    ];
+
+    const W = 320, H = 180, PAD_L = 38, PAD_R = 12, PAD_T = 10, PAD_B = 24;
+    const iw = W - PAD_L - PAD_R;
+    const ih = H - PAD_T - PAD_B;
+
+    const prices = allPoints.flatMap(p => [p.price, p.low, p.high].filter(Boolean));
+    const yMin = Math.floor(Math.min(...prices) - 2);
+    const yMax = Math.ceil(Math.max(...prices) + 2);
+
+    const xFor = i => PAD_L + (i / (allPoints.length - 1)) * iw;
+    const yFor = p => PAD_T + ih - ((p - yMin) / (yMax - yMin)) * ih;
+
+    const histPath = hist.map((d, i) => `${i === 0 ? 'M' : 'L'}${xFor(i)},${yFor(d.price)}`).join(' ');
+    const joinIdx = hist.length - 1;
+    const fcstPath = fcst.map((d, i) => {
+      const xi = joinIdx + i + 1;
+      return `${i === 0 ? 'M' + xFor(joinIdx) + ',' + yFor(hist[hist.length-1].price) + ' L' : 'L'}${xFor(xi)},${yFor(d.price)}`;
+    }).join(' ');
+
+    const bandPath =
+      'M ' + fcst.map((d, i) => `${xFor(joinIdx + i + 1)},${yFor(d.high)}`).join(' L ') +
+      ' L ' + fcst.map((d, i) => `${xFor(joinIdx + fcst.length - i)},${yFor(fcst[fcst.length - 1 - i].low)}`).join(' L ') + ' Z';
+
+    const yTicks = [yMin, Math.round((yMin + yMax) / 2), yMax];
+
+    container.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible;">
+        <!-- Y-axis grid -->
+        ${yTicks.map(v => `
+          <line x1="${PAD_L}" x2="${W - PAD_R}" y1="${yFor(v)}" y2="${yFor(v)}"
+                stroke="#EADFBE" stroke-width="1" stroke-dasharray="2,3"/>
+          <text x="${PAD_L - 6}" y="${yFor(v) + 3}" text-anchor="end"
+                font-size="9" fill="#5A4530" font-family="Fraunces,serif">₹${v}</text>
+        `).join('')}
+
+        <!-- Confidence band -->
+        <path d="${bandPath}" fill="rgba(107, 127, 76, 0.18)" stroke="none"/>
+
+        <!-- History line -->
+        <path d="${histPath}" fill="none" stroke="#2B1810" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Forecast line -->
+        <path d="${fcstPath}" fill="none" stroke="#D49B26" stroke-width="2.2" stroke-dasharray="5,3" stroke-linecap="round"/>
+
+        <!-- Today marker -->
+        <line x1="${xFor(joinIdx)}" y1="${PAD_T}" x2="${xFor(joinIdx)}" y2="${PAD_T + ih}"
+              stroke="#B54C20" stroke-width="1" stroke-dasharray="2,3" opacity="0.6"/>
+        <circle cx="${xFor(joinIdx)}" cy="${yFor(hist[hist.length-1].price)}" r="4" fill="#B54C20"/>
+        <text x="${xFor(joinIdx)}" y="${PAD_T - 2}" text-anchor="middle"
+              font-size="9" fill="#B54C20" font-weight="600">today</text>
+
+        <!-- Key forecast labels -->
+        <text x="${xFor(allPoints.length - 1)}" y="${yFor(fcst[fcst.length-1].price) - 6}"
+              text-anchor="end" font-size="10" fill="#A87813" font-weight="600">
+          ₹${fcst[fcst.length-1].price}
+        </text>
+      </svg>
+    `;
+  }
+
+  // Minimal fallback if forecasts.json can't be fetched (file:// origins)
+  const FALLBACK_DATA = {
+    Pune: {
+      history: Array.from({length: 14}, (_, i) => ({
+        date: `2026-04-${String(i+2).padStart(2,'0')}`,
+        price: 38 + Math.sin(i/2) * 2.5 + Math.random() * 1.5
+      })).map(d => ({...d, price: Math.round(d.price * 100) / 100})),
+      forecast: Array.from({length: 14}, (_, i) => {
+        const p = 41 + i * 0.2 + Math.sin(i/2) * 1.5;
+        return {
+          date: `2026-04-${String(16+i).padStart(2,'0')}`,
+          price: Math.round(p * 100) / 100,
+          low_95: Math.round((p - 3) * 100) / 100,
+          high_95: Math.round((p + 3.5) * 100) / 100,
+        };
+      })
+    }
+  };
+
+  render();
+</script>
+</body>
+</html>
