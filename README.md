@@ -1,6 +1,10 @@
 # Mandi Mate
 
 > A Marathi-first, fully offline agricultural decision agent for smallholder tomato farmers in Maharashtra, powered by Gemma 4.
+>
+> **🎬 Demo video:** https://www.youtube.com/watch?v=DusxyNF3L-U
+> **🔴 Live demo:** https://nehashukla161.github.io/Mandi-Mate/web_prototype/
+> **💻 Code:** https://github.com/NehaShukla161/Mandi-Mate
 
 > **🎬 Demo video:** https://www.youtube.com/watch?v=DusxyNF3L-U
 > **🔴 Live demo:** https://nehashukla161.github.io/Mandi-Mate/web_prototype/
